@@ -24,12 +24,12 @@ def generate_cyclical_features(df, col_name, period, start_num=0):
 
 def preprocessDam(file_name):
     data = pd.read_csv(f'./data/{file_name}.csv')
-    data['1일후유입량'] = data['당일유입량'][1:].reset_index()['당일유입량']
-    data['2일후유입량'] = data['당일유입량'][2:].reset_index()['당일유입량']
+    # data['1일후유입량'] = data['당일유입량'][1:].reset_index()['당일유입량']
+    # data['2일후유입량'] = data['당일유입량'][2:].reset_index()['당일유입량']
 
     data = data[['시간', '저수량(현재)', '전일방류량(본댐)',
-                 '당일유입량', '전일유입량', '1일후유입량', '2일후유입량', '홍수기']]
-    data = data.iloc[:-2,]
+                 '당일유입량',  '홍수기']]
+    # data = data.iloc[:-2,]
 
     data.set_index('시간')
     data.index = pd.to_datetime(data.index)
@@ -45,5 +45,10 @@ def preprocessDam(file_name):
 
 def preprocessWeather(file_name):
     data = pd.read_csv(f'./data/{file_name}.csv')
-    data = data[['일시', '기온(°C)', '강수량(mm)', '지면온도(°C)', '습도(%)']]
+    data['1일후강수량'] = data['강수량(mm)'][1:].reset_index()['강수량(mm)']
+    data['2일후강수량'] = data['강수량(mm)'][2:].reset_index()['강수량(mm)']
+    data = data[['일시', '기온(°C)', '강수량(mm)', '지면온도(°C)',
+                 '습도(%)', '1일후강수량', '2일후강수량']]
+    data = data.iloc[:-2,]
+
     data.to_csv(f'./data/{file_name}_forTrain.csv', index=False)
