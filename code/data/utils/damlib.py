@@ -108,13 +108,13 @@ def collect(startY, startM, startD, endY, endM, endD, serviceKey, url):
                 row.append(parse(item, vdate, i-1))
         df2 = pd.DataFrame(row)
         df2 = df2[df2["댐이름"] == "합천"]
-        df2.to_csv("./합천다목적댐/합천다목적댐_" +
+        df2.to_csv("./data/합천다목적댐/합천다목적댐_" +
                    vdate.strftime("%Y-%m-%d")+".csv", index=False)
         date = date+dt.timedelta(days=1)
 
 
 def concat(startY, endY):
-    file_names = glob("../data/합천다목적댐_전체원본/*.csv")
+    file_names = glob("./data/합천다목적댐_전체원본/*.csv")
 
     total = pd.DataFrame()
     for file_name in file_names:
@@ -131,7 +131,7 @@ def concat(startY, endY):
     total.sort_index(inplace=True)
     total = total[total.index.year >= startY]
 
-    for feature in total.columns[1:]:
+    for feature in total.columns:
         total[feature] = total[feature].astype(
             str).str.replace(',', '').astype(float)
 
@@ -146,7 +146,7 @@ def concat(startY, endY):
 
         total.loc[(total.index.to_pydatetime() >= start_date) & (
             total.index.to_pydatetime() < end_date), '홍수기'] = 1
-    total.to_csv(f"../data/합천다목적댐_전체.csv")
+    total.to_csv(f"./data/합천다목적댐_전체.csv")
 
     total_daily = total.resample(rule='D').mean()
-    total_daily.to_csv(f"../data/합천다목적댐_전체_일별.csv")
+    total_daily.to_csv(f"./data/합천다목적댐_전체_일별.csv")

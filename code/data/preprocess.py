@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import os
 
-from preprocesslib import merge, preprocessDam, preprocessWeather
+from utils.preprocesslib import merge, preprocessDam, preprocessWeather
 
 if __name__ == '__main__':
     merge('합천다목적댐_전체_일별', '종상기상관측_전체_일별', '합천_댐기상종합')

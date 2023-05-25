@@ -1,7 +1,8 @@
-EDA/
-data/
 *.csv
 *.png
+__pycache__
+.vscode
+images
 */__pycache__
 */.vscode
 */*/images

@@ -4,12 +4,12 @@ import os
 
 
 def concat(startY, endY):
-    data_files = os.listdir("../data/합천군_종상기상관측")
+    data_files = os.listdir("./data/합천군_종상기상관측")
     data_files.sort()
     year = range(startY, endY+1)
     data = pd.DataFrame()
     for name in year:
-        df = pd.read_csv("../data/합천군_종상기상관측/기상청데이터_" +
+        df = pd.read_csv("./data/합천군_종상기상관측/기상청데이터_" +
                          str(name)+".csv", encoding="cp949")
         data = pd.concat([data, df])
     data.drop(["지면상태(지면상태코드)", "현상번호(국내식)", "운형(운형약어)", "일사(MJ/m2)", "3시간신적설(cm)",
@@ -28,7 +28,7 @@ def concat(startY, endY):
     data.interpolate(method='linear', inplace=True)
     data.ffill(inplace=True)
     data.bfill(inplace=True)
-    data.to_csv(f"../data/종상기상관측_전체.csv")
+    data.to_csv(f"./data/종상기상관측_전체.csv")
 
     data_daily = data.resample(rule='D').mean()
-    data_daily.to_csv(f"../data/종상기상관측_전체_일별.csv")
+    data_daily.to_csv(f"./data/종상기상관측_전체_일별.csv")
