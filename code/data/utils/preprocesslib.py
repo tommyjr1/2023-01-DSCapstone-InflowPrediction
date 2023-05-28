@@ -31,10 +31,14 @@ def preprocessDam(file_name):
 
     # data['1일후유입량'] = data['당일유입량'][1:].reset_index()['당일유입량']
     # data['2일후유입량'] = data['당일유입량'][2:].reset_index()['당일유입량']
+    # 저수위(현재),저수량(현재),저수위(예년),저수량(예년), 예년누계강우량,강우량전일,금년누계강우량
+    data['저수위변화'] = data['저수위(현재)'] - data['저수위(예년)']
+    data['저수량변화'] = data['저수량(현재)'] - data['저수량(예년)']
+    data['강우변화'] = data['금년누계강우량'] - data['예년누계강우량']
 
-    data = data[['저수량(현재)', '전일방류량(본댐)',
-                 '당일유입량',  '홍수기']]
-    # data = data.iloc[:-2,]
+    mask = data.columns.str.contains('발전') | data.columns.str.contains('전년') | data.columns.str.contains(
+        '방류') | data.columns.str.contains('연간') | data.columns.str.contains('강우량')
+    data = data[[x for x in data.columns if x not in data.columns[mask]]]
 
     df_date = data.assign(month=data.index.month).assign(
         day_of_week=data.index.dayofweek).assign(week_of_year=data.index.isocalendar().week)
@@ -49,8 +53,6 @@ def preprocessWeather(file_name):
     data = pd.read_csv(f'./data/{file_name}.csv', encoding="utf-8-sig")
     data['1일후강수량'] = data['강수량(mm)'][1:].reset_index()['강수량(mm)']
     data['2일후강수량'] = data['강수량(mm)'][2:].reset_index()['강수량(mm)']
-    data = data[['일시', '기온(°C)', '강수량(mm)', '지면온도(°C)',
-                 '습도(%)', '1일후강수량', '2일후강수량']]
     data = data.iloc[:-2,]
 
     data.to_csv(f'./data/{file_name}_forTrain.csv',
