@@ -1,6 +1,15 @@
 import pandas as pd
 import numpy as np
 import os
+from sklearn.decomposition import PCA
+
+
+def scale(scaler, df):
+    scaled_data = scaler.fit_transform(df)
+    df_scaled = pd.DataFrame(
+        data=scaled_data, columns=df.columns, index=df.index.values)
+    df_scaled.reset_index(drop=True, inplace=True)
+    return df_scaled
 
 
 def merge(dam_file, weather_file, output_name):
@@ -14,6 +23,32 @@ def merge(dam_file, weather_file, output_name):
     df = pd.concat([dam, weather], axis=1)
     df.dropna(inplace=True)
     df.to_csv(f'./data/{output_name}.csv', encoding="utf-8-sig")
+
+
+def scalenvif(file, scaler):
+    df = pd.read_csv(f'./data/{file}.csv', encoding="utf-8-sig", index_col=0)
+    df = scale(scaler, df)
+    df = df[['전일유입량', '강수량(mm)', '1일후강수량', '홍수기', '일조(hr)', '풍속(m/s)', '강우변화',
+             '습도(%)', '시정(10m)', '최저운고(100m )', 'sin_week_of_year',
+             'cos_week_of_year', '당일유입량']]
+    df.to_csv(f'./data/{file}_scaled.csv', encoding="utf-8-sig")
+
+
+def pca(file, comp):
+    fd_scaled = pd.read_csv(
+        f'./data/{file}.csv', encoding="utf-8-sig", index_col=0)
+    y = fd_scaled[['당일유입량']]
+    x = fd_scaled.drop('당일유입량', axis=1)
+    pca = PCA(n_components=comp)
+    printcipalComponents = pca.fit_transform(x)
+    principalDf = pd.DataFrame(
+        data=printcipalComponents, index=fd_scaled.index.values)
+    print(sum(pca.explained_variance_ratio_))
+    print(pca.explained_variance_ratio_)
+
+    principalDf['당일유입량'] = y.values
+    principalDf.to_csv(
+        f'./data/{file}_pca_{comp}.csv', encoding='utf-8-sig')
 
 
 def generate_cyclical_features(df, col_name, period, start_num=0):
