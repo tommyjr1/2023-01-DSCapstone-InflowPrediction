@@ -1,6 +1,15 @@
 import pandas as pd
 import numpy as np
 import os
+from sklearn.decomposition import PCA
+
+
+def scale(scaler, df):
+    scaled_data = scaler.fit_transform(df)
+    df_scaled = pd.DataFrame(
+        data=scaled_data, columns=df.columns, index=df.index.values)
+    df_scaled.reset_index(drop=True, inplace=True)
+    return df_scaled
 
 
 def merge(dam_file, weather_file, output_name):
@@ -14,6 +23,33 @@ def merge(dam_file, weather_file, output_name):
     df = pd.concat([dam, weather], axis=1)
     df.dropna(inplace=True)
     df.to_csv(f'./data/{output_name}.csv', encoding="utf-8-sig")
+
+
+def scalenvif(file, scaler, flood):
+    df = pd.read_csv(f'./data/{file}.csv', encoding="utf-8-sig", index_col=0)
+    df = scale(scaler, df)
+    df = df[df['홍수기'] == flood].drop('홍수기', axis=1)
+    if (flood == 0):
+        df = df[['증기압(hPa)', '강수량(mm)', '1일후강수량', '풍속(m/s)', 'cos_week_of_year',
+                '저수량(현재)', '시정(10m)', 'sin_month', '최저운고(100m )']]
+        df.to_csv(f'./data/{file}_scaled_notflood.csv', encoding="utf-8-sig")
+
+
+def pca(file, comp):
+    fd_scaled = pd.read_csv(
+        f'./data/{file}.csv', encoding="utf-8-sig", index_col=0)
+    y = fd_scaled[['당일유입량']]
+    x = fd_scaled.drop('당일유입량', axis=1)
+    pca = PCA(n_components=comp)
+    printcipalComponents = pca.fit_transform(x)
+    principalDf = pd.DataFrame(
+        data=printcipalComponents, index=fd_scaled.index.values)
+    print(sum(pca.explained_variance_ratio_))
+    print(pca.explained_variance_ratio_)
+
+    principalDf['당일유입량'] = y.values
+    principalDf.to_csv(
+        f'./data/{file}_pca_{comp}.csv', encoding='utf-8-sig')
 
 
 def generate_cyclical_features(df, col_name, period, start_num=0):
@@ -31,10 +67,14 @@ def preprocessDam(file_name):
 
     # data['1일후유입량'] = data['당일유입량'][1:].reset_index()['당일유입량']
     # data['2일후유입량'] = data['당일유입량'][2:].reset_index()['당일유입량']
+    # 저수위(현재),저수량(현재),저수위(예년),저수량(예년), 예년누계강우량,강우량전일,금년누계강우량
+    data['저수위변화'] = data['저수위(현재)'] - data['저수위(예년)']
+    data['저수량변화'] = data['저수량(현재)'] - data['저수량(예년)']
+    data['강우변화'] = data['금년누계강우량'] - data['예년누계강우량']
 
-    data = data[['저수량(현재)', '전일방류량(본댐)',
-                 '당일유입량',  '홍수기']]
-    # data = data.iloc[:-2,]
+    mask = data.columns.str.contains('발전') | data.columns.str.contains('전년') | data.columns.str.contains(
+        '방류') | data.columns.str.contains('연간') | data.columns.str.contains('강우량')
+    data = data[[x for x in data.columns if x not in data.columns[mask]]]
 
     df_date = data.assign(month=data.index.month).assign(
         day_of_week=data.index.dayofweek).assign(week_of_year=data.index.isocalendar().week)
@@ -49,8 +89,6 @@ def preprocessWeather(file_name):
     data = pd.read_csv(f'./data/{file_name}.csv', encoding="utf-8-sig")
     data['1일후강수량'] = data['강수량(mm)'][1:].reset_index()['강수량(mm)']
     data['2일후강수량'] = data['강수량(mm)'][2:].reset_index()['강수량(mm)']
-    data = data[['일시', '기온(°C)', '강수량(mm)', '지면온도(°C)',
-                 '습도(%)', '1일후강수량', '2일후강수량']]
     data = data.iloc[:-2,]
 
     data.to_csv(f'./data/{file_name}_forTrain.csv',
