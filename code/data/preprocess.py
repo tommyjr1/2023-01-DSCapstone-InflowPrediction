@@ -14,5 +14,5 @@ if __name__ == '__main__':
     weather_file = '종상기상관측_전체_일별_forTrain'
     # merge(dam_file, weather_file, '합천_댐기상종합_forTrain4')
     scaler = MinMaxScaler()
-    # scalenvif('합천_댐기상종합_forTrain4', scaler)
-    pca('합천_댐기상종합_forTrain4_scaled', 3)
+    scalenvif('합천_댐기상종합_forTrain4', scaler, 0)
+    # pca('합천_댐기상종합_forTrain4_scaled', 3)

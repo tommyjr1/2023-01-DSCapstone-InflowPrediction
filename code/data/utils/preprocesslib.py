@@ -25,13 +25,14 @@ def merge(dam_file, weather_file, output_name):
     df.to_csv(f'./data/{output_name}.csv', encoding="utf-8-sig")
 
 
-def scalenvif(file, scaler):
+def scalenvif(file, scaler, flood):
     df = pd.read_csv(f'./data/{file}.csv', encoding="utf-8-sig", index_col=0)
     df = scale(scaler, df)
-    df = df[['전일유입량', '강수량(mm)', '1일후강수량', '홍수기', '일조(hr)', '풍속(m/s)', '강우변화',
-             '습도(%)', '시정(10m)', '최저운고(100m )', 'sin_week_of_year',
-             'cos_week_of_year', '당일유입량']]
-    df.to_csv(f'./data/{file}_scaled.csv', encoding="utf-8-sig")
+    df = df[df['홍수기'] == flood].drop('홍수기', axis=1)
+    if (flood == 0):
+        df = df[['증기압(hPa)', '강수량(mm)', '1일후강수량', '풍속(m/s)', 'cos_week_of_year',
+                '저수량(현재)', '시정(10m)', 'sin_month', '최저운고(100m )']]
+        df.to_csv(f'./data/{file}_scaled_notflood.csv', encoding="utf-8-sig")
 
 
 def pca(file, comp):
