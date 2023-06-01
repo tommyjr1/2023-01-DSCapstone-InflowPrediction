@@ -24,11 +24,13 @@ def concat(startY, endY):
     for feature in data.columns[1:]:
         data[feature] = data[feature].astype(float)
 
+    data.to_csv(f"./data/종상기상관측_전체_원본.csv", encoding="utf-8-sig")
+
     data = data.resample(rule='H').mean()
     data.interpolate(method='linear', inplace=True)
     data.ffill(inplace=True)
     data.bfill(inplace=True)
-    data.to_csv(f"./data/종상기상관측_전체.csv", encoding="utf-8-sig")
+    data.to_csv(f"./data/종상기상관측_전체_시간별.csv", encoding="utf-8-sig")
 
     data_daily = data.resample(rule='D').mean()
     data_daily.to_csv(f"./data/종상기상관측_전체_일별.csv", encoding="utf-8-sig")

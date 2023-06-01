@@ -124,8 +124,7 @@ def concat(startY, endY):
 
     total.dropna(subset=['시간'], how='any', axis=0, inplace=True)
     total.drop(['댐이름', '수계', 'Unnamed: 0'], axis=1, inplace=True)
-    total['당일유입량'] = total['전일유입량'][24:].reset_index()['전일유입량']
-    total = total.iloc[:-24,]
+
     total['시간'] = pd.to_datetime(total['시간'])
     total = total.set_index(keys='시간')
     total.sort_index(inplace=True)
@@ -134,13 +133,18 @@ def concat(startY, endY):
     for feature in total.columns:
         total[feature] = total[feature].astype(
             str).str.replace(',', '').astype(float)
+    total.to_csv(f"./data/합천다목적댐_전체_원본.csv", encoding="utf-8-sig")
 
     total = total.resample(rule='H').mean()
     total = total.interpolate(method='linear')
     total.ffill(inplace=True)
     total.bfill(inplace=True)
+    total = total.reset_index()
+    total['당일유입량'] = total['전일유입량'][24:].reset_index()['전일유입량']
+    total.dropna(inplace=True)
     total['홍수기'] = 0
-    for year in range(2000, 2024):
+    total = total.set_index(keys='시간')
+    for year in range(2000, endY+1):
         start_date = dt.datetime(year, 6, 21)  # 시작 날짜 (6월 21일)
         end_date = dt.datetime(year, 9, 21, 0, 0, 0)  # 종료 날짜 (9월 20일)
 
@@ -148,10 +152,9 @@ def concat(startY, endY):
             total.index.to_pydatetime() < end_date), '홍수기'] = 1
 
         first_date = dt.datetime(year, 1, 1)  # 매 1일
-        if first_date < dt.datetime(2023, 2, 1):
+        if first_date < dt.datetime(endY, 2, 1):
             total.loc[first_date:first_date+dt.timedelta(
                 days=1), '금년누계강우량'] = total.loc[first_date:first_date+dt.timedelta(days=1), '강우량금일']
-    total.to_csv(f"./data/합천다목적댐_전체.csv", encoding="utf-8-sig")
-
+    total.to_csv(f"./data/합천다목적댐_전체_시간별.csv", encoding="utf-8-sig")
     total_daily = total.resample(rule='D').mean()
     total_daily.to_csv(f"./data/합천다목적댐_전체_일별.csv", encoding="utf-8-sig")

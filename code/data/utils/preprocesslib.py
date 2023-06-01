@@ -8,7 +8,7 @@ def scale(scaler, df):
     scaled_data = scaler.fit_transform(df)
     df_scaled = pd.DataFrame(
         data=scaled_data, columns=df.columns, index=df.index.values)
-    df_scaled.reset_index(drop=True, inplace=True)
+    # df_scaled.reset_index(drop=True, inplace=True)
     return df_scaled
 
 
@@ -31,8 +31,12 @@ def scalenvif(file, scaler, flood):
     df = df[df['홍수기'] == flood].drop('홍수기', axis=1)
     if (flood == 0):
         df = df[['증기압(hPa)', '강수량(mm)', '1일후강수량', '풍속(m/s)', 'cos_week_of_year',
-                '저수량(현재)', '시정(10m)', 'sin_month', '최저운고(100m )']]
+                '저수량(현재)', '시정(10m)', 'sin_month', '최저운고(100m )', '당일유입량']]
         df.to_csv(f'./data/{file}_scaled_notflood.csv', encoding="utf-8-sig")
+    if (flood == 1):
+        df = df[['강우변화', '풍속(m/s)', '강수량(mm)', '최저운고(100m )', '1일후강수량',
+                 'cos_week_of_year', 'sin_month', '당일유입량']]
+        df.to_csv(f'./data/{file}_scaled_flood.csv', encoding="utf-8-sig")
 
 
 def pca(file, comp):
@@ -82,7 +86,7 @@ def preprocessDam(file_name):
     df_date = generate_cyclical_features(df_date, 'month', 12, 1)
     df_date = generate_cyclical_features(df_date, 'week_of_year', 52, 0)
 
-    df_date.to_csv(f'./data/{file_name}_forTrain.csv', encoding="utf-8-sig")
+    df_date.to_csv(f'./data/{file_name}_전처리.csv', encoding="utf-8-sig")
 
 
 def preprocessWeather(file_name):
@@ -91,5 +95,5 @@ def preprocessWeather(file_name):
     data['2일후강수량'] = data['강수량(mm)'][2:].reset_index()['강수량(mm)']
     data = data.iloc[:-2,]
 
-    data.to_csv(f'./data/{file_name}_forTrain.csv',
+    data.to_csv(f'./data/{file_name}_전처리.csv',
                 index=False, encoding="utf-8-sig")
