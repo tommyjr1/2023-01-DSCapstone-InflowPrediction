@@ -30,12 +30,22 @@ def scalenvif(file, scaler, flood):
     df = scale(scaler, df)
     df = df[df['홍수기'] == flood].drop('홍수기', axis=1)
     if (flood == 0):
-        df = df[['증기압(hPa)', '강수량(mm)', '1일후강수량', '풍속(m/s)', 'cos_week_of_year',
-                '저수량(현재)', '시정(10m)', 'sin_month', '최저운고(100m )', '당일유입량']]
+        # df = df[['증기압(hPa)', '강수량(mm)', '1일후강수량', '풍속(m/s)', 'cos_week_of_year',
+        #         '저수량(현재)', '시정(10m)', 'sin_month', '최저운고(100m )', '당일유입량']]
+        # df = df[['증기압(hPa)', '강수량(mm)', '1일후강수량', '저수위(현재)', '풍속(m/s)', 'sin_month',
+        #          '최저운고(100m )', '시정(10m)', '일조(hr)', 'cos_month', '당일유입량']]
+        df = df[['전일유입량', '강수량(mm)', '1일후강수량', '증기압(hPa)', '풍속(m/s)', '저수위(현재)',
+                 'cos_week_of_year', 'sin_month', '최저운고(100m )', '시정(10m)', '당일유입량']]
         df.to_csv(f'./data/{file}_scaled_notflood.csv', encoding="utf-8-sig")
     if (flood == 1):
-        df = df[['강우변화', '풍속(m/s)', '강수량(mm)', '최저운고(100m )', '1일후강수량',
-                 'cos_week_of_year', 'sin_month', '당일유입량']]
+        # df = df[['강우변화', '풍속(m/s)', '강수량(mm)', '최저운고(100m )', '1일후강수량',
+        #          'cos_week_of_year', 'sin_month', '당일유입량']]
+
+        # df = df[['풍속(m/s)', '강수량(mm)', '1일후강수량', 'sin_month', 'cos_month', '적설(cm)',
+        #          '최저운고(100m )', '일조(hr)', '저수량(현재)', '당일유입량']]
+
+        df = df[['전일유입량', '강수량(mm)', '풍속(m/s)', '1일후강수량', '강우변화',
+                 'cos_week_of_year', '적설(cm)', '최저운고(100m )', '당일유입량']]
         df.to_csv(f'./data/{file}_scaled_flood.csv', encoding="utf-8-sig")
 
 
